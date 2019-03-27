@@ -6,8 +6,8 @@ Install it from [NuGet](https://www.nuget.org/packages/ResourceReader/).
 
 Provides type safe access to embedded text files. So what does that mean? Say that we are creating an application that does data access using an micro-orm like [Dapper](https://www.nuget.org/packages/Dapper/), [DbReader](https://www.nuget.org/packages/DbReader/) or any other tool that uses plain old SQL as input.
 
-These database queries needs to live somewhere, either as verbatim strings in our source code or as files on disk. 
-Given the latter approach we might have a folder in our project that looks something like this. 
+These database queries needs to live somewhere, either as verbatim strings in our source code or as files on disk.
+Given the latter approach we might have a folder in our project that looks something like this.
 
 ```shell
 └── Queries
@@ -25,7 +25,7 @@ Further on we can embed these files as resources in our `csproj` file like this.
 </ItemGroup>
 ```
 
-So when we compile our project these files are now embedded into our assembly and in order to retrieve these files, we need to read them out using the [GetManifestResourceStream](https://docs.microsoft.com/en-us/dotnet/api/system.reflection.assembly.getmanifestresourcestream?view=netframework-4.7.2) method. Such code can get messy real fast and besides also hard to maintain as these resources needs to be qualified with the full namespace making it prone to errors if we move this files around. 
+So when we compile our project these files are now embedded into our assembly and in order to retrieve these files, we need to read them out using the [GetManifestResourceStream](https://docs.microsoft.com/en-us/dotnet/api/system.reflection.assembly.getmanifestresourcestream?view=netframework-4.7.2) method. Such code can get messy real fast and besides also hard to maintain as these resources needs to be qualified with the full namespace making it prone to errors if we move this files around.
 
 Lets look at an alternative approach using **ResourceReader**
 
@@ -34,7 +34,7 @@ We start off by creating an interface that will represent our queries.
 ```c#
 public interface IQueries
 {
-  	string GetAllCustomers { get; }
+    string GetAllCustomers { get; }
     string GetCustomerById { get; }
     string InsertCustomer { get; }
     string DeleteCustomer { get; }
@@ -49,9 +49,9 @@ public class SomeService
   private readonly IQueries _queries;
   public SomeService(IQueries queries)
   {
-  	_queries = queries;
+    _queries = queries;
   }
-  	
+
   public Customer GetCustomer(int id)
   {
     var query = _queries.GetCustomerById;
@@ -60,7 +60,7 @@ public class SomeService
 }
 ```
 
-So where is the implementation of `IQueries` we might ask? In fact don't need to implement it and this is where **ResourceReader** comes into play. 
+So where is the implementation of `IQueries` we might ask? In fact don't need to implement it and this is where **ResourceReader** comes into play.
 
 ```c#
 var queries = new ResourceBuilder().Build<IQueries>();
@@ -71,7 +71,7 @@ That's it! That is all we need to do in order to create an `IQueries` instance t
 ```c#
 public void ConfigureServices(IServiceCollection services)
 {
-	services.Singleton<IQueries>(f => new ResourceBuilder().Build<IQueries>());
+  services.Singleton<IQueries>(f => new ResourceBuilder().Build<IQueries>());
 }
 ```
 
@@ -81,9 +81,9 @@ By default, **ResourceReader** will look for resources in all loaded assemblies 
 var queries = new ResourceBuilder().AddAssembly(typeof(SomeType).Assembly).Build<IQueries>();
 ```
 
-One nice aspect of this is that it makes it possible to choose resource binding at runtime. For instance, in the example of database queries, we could have one assembly containing [SQLite](https://www.sqlite.org/index.html) queries and another containing the [MySql](https://en.wikipedia.org/wiki/MySQL) equivalents of the same queries. 
+One nice aspect of this is that it makes it possible to choose resource binding at runtime. For instance, in the example of database queries, we could have one assembly containing [SQLite](https://www.sqlite.org/index.html) queries and another containing the [MySql](https://en.wikipedia.org/wiki/MySQL) equivalents of the same queries.
 
-For furter customisation we can also specify how to match a given property to an embedded resource. 
+For furter customisation we can also specify how to match a given property to an embedded resource.
 
 ```c#
 new ResourceBuilder().WithPredicate((resourceName, requestingProperty) => true);
@@ -101,4 +101,3 @@ new ResourceBuilder().WithTextProcessor((stream) => "process the stream here")
 
 
 
- 
