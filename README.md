@@ -46,17 +46,17 @@ Now, wouldn't it be nice if could retrieve our queries just by accessing these p
 ```C#
 public class SomeService
 {
-  	private readonly IQueries _queries;
-  	public SomeService(IQueries queries)
-  	{
-      	_queries = queries;
-  	}
+  private readonly IQueries _queries;
+  public SomeService(IQueries queries)
+  {
+  	_queries = queries;
+  }
   	
-  	public Customer GetCustomer(int id)
-  	{
-    		var query = _queries.GetCustomerById;
-        // Execute query using our preferred tool
-  	}
+  public Customer GetCustomer(int id)
+  {
+    var query = _queries.GetCustomerById;
+   	// Execute query using our preferred tool
+  }
 }
 ```
 
@@ -71,7 +71,7 @@ That's it! That is all we need to do in order to create an `IQueries` instance t
 ```c#
 public void ConfigureServices(IServiceCollection services)
 {
-		services.Singleton<IQueries>(f => new ResourceBuilder().Build<IQueries>());
+	services.Singleton<IQueries>(f => new ResourceBuilder().Build<IQueries>());
 }
 ```
 
