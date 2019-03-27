@@ -1,6 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>0.0.1</Version>
+    <Authors>Bernhard Richter</Authors>
+    <PackageProjectUrl>https://github.com/seesharper/ResourceReader</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/seesharper/ResourceReader</RepositoryUrl>
+    <PackageLicenseUrl>http://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <Copyright>Bernhard Richter</Copyright>
+    <PackageTags>C# resource resources</PackageTags>
+    <Description>Provides strongly typed access to embedded text files</Description>
+
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />

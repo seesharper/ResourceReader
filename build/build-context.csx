@@ -14,3 +14,5 @@ var UnitTests = Path.Combine(root, "..", "src", $"{projectName}.Tests");
 var artifactsFolder = CreateDirectory(root, "Artifacts");
 var gitHubArtifactsFolder = CreateDirectory(artifactsFolder, "GitHub");
 var nuGetArtifactsFolder = CreateDirectory(artifactsFolder, "NuGet");
+
+var PathToReleaseNotes = Path.Combine(gitHubArtifactsFolder,"ReleaseNotes.md");
