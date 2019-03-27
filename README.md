@@ -21,7 +21,7 @@ Further on we can embed these files as resources in our `csproj` file like this.
 
 ```xml
 <ItemGroup>
-		<EmbeddedResource Include="**/*.sql" />
+  <EmbeddedResource Include="**/*.sql" />
 </ItemGroup>
 ```
 
