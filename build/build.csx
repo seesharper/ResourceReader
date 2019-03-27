@@ -14,6 +14,7 @@ Step pack = () => {
     DotNet.Pack(projectFolder, nuGetArtifactsFolder);
 };
 
+[DefaultStep]
 AsyncStep release = async () => {
     pack();
     await Deploy();
