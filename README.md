@@ -95,7 +95,7 @@ Finally we can also customize how to process the resource stream that is read fr
 new ResourceBuilder().WithTextProcessor((stream) => "process the stream here")
 ```
 
-
+Enjoy!
 
 
 
