@@ -42,12 +42,12 @@ namespace ResourceReader
 
             if (resources.Length == 0)
             {
-                throw new InvalidOperationException($"Unable to find any resources that matches '{property}'");
+                throw new InvalidOperationException($"Unable to find any resources that matches '{property.Name}'");
             }
 
             if (resources.Length > 1)
             {
-                throw new InvalidOperationException($"Found multiple resources macthing '{property}' ()");
+                throw new InvalidOperationException($"Found multiple resources macthing '{property.Name}' ()");
             }
 
             var resourceStream = resources[0].assembly.GetManifestResourceStream(resources[0].resourcename);
