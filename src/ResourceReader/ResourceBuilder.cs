@@ -91,6 +91,11 @@ namespace ResourceReader
             return this;
         }
 
+        /// <summary>
+        /// Builds an instances of typeparamref name="T" that can be used to access embedded text file resources.
+        /// </summary>
+        /// <typeparam name="T">The interface type for which to build the resource accessor.</typeparam>
+        /// <returns></returns>
         public T Build<T>()
         {
             var properties = typeof(T).GetProperties();
