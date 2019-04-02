@@ -83,7 +83,7 @@ var queries = new ResourceBuilder().AddAssembly(typeof(SomeType).Assembly).Build
 
 One nice aspect of this is that it makes it possible to choose resource binding at runtime. For instance, in the example of database queries, we could have one assembly containing [SQLite](https://www.sqlite.org/index.html) queries and another containing the [MySql](https://en.wikipedia.org/wiki/MySQL) equivalents of the same queries.
 
-For furter customisation we can also specify how to match a given property to an embedded resource.
+For further customisation we can also specify how to match a given property to an embedded resource.
 
 ```c#
 new ResourceBuilder().WithPredicate((resourceName, requestingProperty) => true);
