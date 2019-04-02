@@ -10,7 +10,7 @@ steps:
   displayName: 'Install latest otnet-script'
 
 - bash: 'dotnet dotnet-script/dotnet-script.dll build/build.csx'
-  displayName: 'Run build.csx'
+  displayName: 'Run build.csx script'
   env:
     IS_SECURE_BUILDENVIRONMENT: $(IS_SECURE_BUILDENVIRONMENT)
     GITHUB_REPO_TOKEN: $(GITHUB_REPO_TOKEN)
