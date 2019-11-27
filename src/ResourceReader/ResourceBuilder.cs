@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ResourceReader
 {
@@ -27,7 +28,7 @@ namespace ResourceReader
             this.textProcessor = textProcessor;
             var properties = this.GetType().GetProperties();
             propertyMap = new ConcurrentDictionary<string, PropertyInfo>(properties.ToDictionary(p => p.Name, p => p));
-            allResources  = assemblies.SelectMany(a => a.GetManifestResourceNames(), (assemblyName, resourceName) => (assemblyName, resourceName)).ToList();
+            allResources = assemblies.SelectMany(a => a.GetManifestResourceNames(), (assemblyName, resourceName) => (assemblyName, resourceName)).ToList();
         }
 
         protected string Load(string name)
@@ -55,7 +56,7 @@ namespace ResourceReader
         }
     }
 
-       public class ResourceBuilder
+    public class ResourceBuilder
     {
         private static MethodInfo loadMethod;
 
@@ -137,7 +138,8 @@ namespace ResourceReader
                 return (resourceName, requestingProperty) =>
                 {
                     var resourceNameWithOutExtension = Path.GetFileNameWithoutExtension(resourceName);
-                    return resourceNameWithOutExtension.EndsWith(requestingProperty.Name, StringComparison.OrdinalIgnoreCase);
+                    var resourceNameWithoutNameSpace = Regex.Match(resourceNameWithOutExtension, @"^.*\.(.*)$").Groups[1].Value;
+                    return resourceNameWithoutNameSpace.Equals(requestingProperty.Name, StringComparison.OrdinalIgnoreCase);
                 };
             }
             else
