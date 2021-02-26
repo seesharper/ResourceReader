@@ -92,7 +92,7 @@ new ResourceBuilder().WithPredicate((resourceName, requestingProperty) => true);
 Finally we can also customize how to process the resource stream that is read from the assembly. The default here is to  read it as UTF-8.
 
 ```c#
-new ResourceBuilder().WithTextProcessor((stream) => "process the stream here")
+new ResourceBuilder().WithTextProcessor((resourceInfo) => resourceInfo.Stream.ReadAsUTF8())
 ```
 
 Enjoy!
