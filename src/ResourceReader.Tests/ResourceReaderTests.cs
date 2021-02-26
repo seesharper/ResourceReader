@@ -24,11 +24,22 @@ namespace ResourceReader.Tests
         }
 
         [Fact]
+        public void ShouldUseCustomTextProcessor()
+        {
+            var resources = new ResourceBuilder().WithTextProcessor(ri =>
+            {
+                return "something else";
+            }).Build<IResources>();
+
+            resources.SampleResource.Should().Be("something else");
+        }
+
+        [Fact]
         public void ShouldThrowMeanfullExceptionWhenResourceIsNotFound()
         {
             var resources = new ResourceBuilder().AddAssembly(typeof(ResourceReaderTests).Assembly).Build<IResources>();
 
-            Action act = () => {var content = resources.UnknownResource;};
+            Action act = () => { var content = resources.UnknownResource; };
 
             act.Should().Throw<InvalidOperationException>().WithMessage("Unable to find any resources that matches 'UnknownResource'");
         }
