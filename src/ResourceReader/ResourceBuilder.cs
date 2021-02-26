@@ -17,12 +17,12 @@ namespace ResourceReader
         private readonly ConcurrentDictionary<PropertyInfo, string> resourceCache = new ConcurrentDictionary<PropertyInfo, string>();
 
         private readonly ResourcePredicate predicate;
-        private readonly Func<Stream, string> textProcessor;
+        private readonly Func<ResourceInfo, string> textProcessor;
         private readonly ConcurrentDictionary<string, PropertyInfo> propertyMap;
 
         private readonly List<(Assembly assembly, string resourcename)> allResources;
 
-        public ResourceRepository(Assembly[] assemblies, ResourcePredicate predicate, Func<Stream, string> textProcessor)
+        public ResourceRepository(Assembly[] assemblies, ResourcePredicate predicate, Func<ResourceInfo, string> textProcessor)
         {
             this.predicate = predicate;
             this.textProcessor = textProcessor;
@@ -48,13 +48,29 @@ namespace ResourceReader
 
             if (resources.Length > 1)
             {
-                throw new InvalidOperationException($"Found multiple resources macthing '{property.Name}' ()");
+                throw new InvalidOperationException($"Found multiple resources macthing '{property.Name}'");
             }
 
             var resourceStream = resources[0].assembly.GetManifestResourceStream(resources[0].resourcename);
-            return textProcessor(resourceStream);
+            return textProcessor(new ResourceInfo(resourceStream, resources[0].resourcename, property));
         }
     }
+
+    public class ResourceInfo
+    {
+        public ResourceInfo(Stream stream, string name, PropertyInfo property)
+        {
+            Stream = stream;
+            Name = name;
+            Property = property;
+        }
+
+        public Stream Stream { get; }
+        public string Name { get; }
+        public PropertyInfo Property { get; }
+    }
+
+
 
     public class ResourceBuilder
     {
@@ -64,12 +80,21 @@ namespace ResourceReader
 
         private ResourcePredicate resourcePredicate;
 
-        private Func<Stream, string> textProcessor;
+        private Func<ResourceInfo, string> textProcessor;
+
+        public static ResourcePredicate DefaultResourcePredicate;
+
 
         static ResourceBuilder()
         {
             loadMethod = typeof(ResourceRepository).GetMethod("Load", BindingFlags.Instance | BindingFlags.NonPublic);
             constructor = typeof(ResourceRepository).GetConstructors()[0];
+            DefaultResourcePredicate = (resourceName, requestingProperty) =>
+            {
+                var resourceNameWithOutExtension = Path.GetFileNameWithoutExtension(resourceName);
+                var resourceNameWithoutNameSpace = Regex.Match(resourceNameWithOutExtension, @"^.*\.(.*)$").Groups[1].Value;
+                return resourceNameWithoutNameSpace.Equals(requestingProperty.Name, StringComparison.OrdinalIgnoreCase);
+            };
         }
 
         private List<Assembly> resourceAssemblies = new List<Assembly>();
@@ -86,7 +111,7 @@ namespace ResourceReader
             return this;
         }
 
-        public ResourceBuilder WithTextProcessor(Func<Stream, string> processor)
+        public ResourceBuilder WithTextProcessor(Func<ResourceInfo, string> processor)
         {
             this.textProcessor = processor;
             return this;
@@ -112,16 +137,13 @@ namespace ResourceReader
             return (T)instance;
         }
 
-        private Func<Stream, string> GetTextProcessor()
+        private Func<ResourceInfo, string> GetTextProcessor()
         {
             if (textProcessor == null)
             {
-                return (resourceStream) =>
+                return (resourceInfo) =>
                 {
-                    using (var reader = new StreamReader(resourceStream, Encoding.UTF8))
-                    {
-                        return reader.ReadToEnd();
-                    }
+                    return resourceInfo.Stream.ReadAsUTF8();
                 };
             }
             else
@@ -135,12 +157,7 @@ namespace ResourceReader
         {
             if (resourcePredicate == null)
             {
-                return (resourceName, requestingProperty) =>
-                {
-                    var resourceNameWithOutExtension = Path.GetFileNameWithoutExtension(resourceName);
-                    var resourceNameWithoutNameSpace = Regex.Match(resourceNameWithOutExtension, @"^.*\.(.*)$").Groups[1].Value;
-                    return resourceNameWithoutNameSpace.Equals(requestingProperty.Name, StringComparison.OrdinalIgnoreCase);
-                };
+                return DefaultResourcePredicate;
             }
             else
             {
@@ -254,6 +271,17 @@ namespace ResourceReader
             var assemblybuilder = AssemblyBuilder.DefineDynamicAssembly(
             new AssemblyName("ResourceRepository"), AssemblyBuilderAccess.Run);
             return assemblybuilder;
+        }
+    }
+
+    public static class StreamExtensions
+    {
+        public static string ReadAsUTF8(this Stream stream)
+        {
+            using (var reader = new StreamReader(stream, Encoding.UTF8))
+            {
+                return reader.ReadToEnd();
+            }
         }
     }
 }
