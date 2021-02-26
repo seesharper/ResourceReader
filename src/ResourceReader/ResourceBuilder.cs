@@ -48,7 +48,7 @@ namespace ResourceReader
 
             if (resources.Length > 1)
             {
-                throw new InvalidOperationException($"Found multiple resources macthing '{property.Name}' ()");
+                throw new InvalidOperationException($"Found multiple resources macthing '{property.Name}'");
             }
 
             var resourceStream = resources[0].assembly.GetManifestResourceStream(resources[0].resourcename);
@@ -82,10 +82,19 @@ namespace ResourceReader
 
         private Func<ResourceInfo, string> textProcessor;
 
+        public static ResourcePredicate DefaultResourcePredicate;
+
+
         static ResourceBuilder()
         {
             loadMethod = typeof(ResourceRepository).GetMethod("Load", BindingFlags.Instance | BindingFlags.NonPublic);
             constructor = typeof(ResourceRepository).GetConstructors()[0];
+            DefaultResourcePredicate = (resourceName, requestingProperty) =>
+            {
+                var resourceNameWithOutExtension = Path.GetFileNameWithoutExtension(resourceName);
+                var resourceNameWithoutNameSpace = Regex.Match(resourceNameWithOutExtension, @"^.*\.(.*)$").Groups[1].Value;
+                return resourceNameWithoutNameSpace.Equals(requestingProperty.Name, StringComparison.OrdinalIgnoreCase);
+            };
         }
 
         private List<Assembly> resourceAssemblies = new List<Assembly>();
@@ -148,12 +157,7 @@ namespace ResourceReader
         {
             if (resourcePredicate == null)
             {
-                return (resourceName, requestingProperty) =>
-                {
-                    var resourceNameWithOutExtension = Path.GetFileNameWithoutExtension(resourceName);
-                    var resourceNameWithoutNameSpace = Regex.Match(resourceNameWithOutExtension, @"^.*\.(.*)$").Groups[1].Value;
-                    return resourceNameWithoutNameSpace.Equals(requestingProperty.Name, StringComparison.OrdinalIgnoreCase);
-                };
+                return DefaultResourcePredicate;
             }
             else
             {
