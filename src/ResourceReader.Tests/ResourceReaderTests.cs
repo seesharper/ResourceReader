@@ -84,6 +84,13 @@ namespace ResourceReader.Tests
             result.Name.Should().Be("John");
             result.Age.Should().Be(30);
         }
+
+        [Fact]
+        public void ShouldDeserializeJsonResourceIntoValueType()
+        {
+            var resources = new ResourceBuilder().AddAssembly(typeof(ResourceReaderTests).Assembly).Build<IResources>();
+            resources.SampleCount.Should().Be(42);
+        }
     }
 
     public interface IResources
@@ -93,6 +100,8 @@ namespace ResourceReader.Tests
         string UnknownResource { get; }
 
         SampleData SampleJsonResource { get; }
+
+        int SampleCount { get; }
     }
 
     public class SampleData
