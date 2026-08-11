@@ -8,10 +8,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - name: Install .Net Core 5.0
-        uses: actions/setup-dotnet@v1.7.2
+      - name: Install .Net 10
+        uses: actions/setup-dotnet@v6.0.0
         with:
-          dotnet-version: 5.0.100
+          dotnet-version: 10.0.x
       - name: Install dotnet-script
         run: dotnet tool install -g dotnet-script
 

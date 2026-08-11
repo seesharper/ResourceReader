@@ -75,6 +75,22 @@ namespace ResourceReader.Tests
             resources.SampleResource.Should().Be("This is a sample resource");
             invoked.Should().BeTrue();
         }
+
+        [Fact]
+        public void ShouldDeserializeJsonResourceIntoType()
+        {
+            var resources = new ResourceBuilder().AddAssembly(typeof(ResourceReaderTests).Assembly).Build<IResources>();
+            var result = resources.SampleJsonResource;
+            result.Name.Should().Be("John");
+            result.Age.Should().Be(30);
+        }
+
+        [Fact]
+        public void ShouldDeserializeJsonResourceIntoValueType()
+        {
+            var resources = new ResourceBuilder().AddAssembly(typeof(ResourceReaderTests).Assembly).Build<IResources>();
+            resources.SampleCount.Should().Be(42);
+        }
     }
 
     public interface IResources
@@ -82,5 +98,15 @@ namespace ResourceReader.Tests
         string SampleResource { get; }
 
         string UnknownResource { get; }
+
+        SampleData SampleJsonResource { get; }
+
+        int SampleCount { get; }
+    }
+
+    public class SampleData
+    {
+        public string Name { get; set; }
+        public int Age { get; set; }
     }
 }

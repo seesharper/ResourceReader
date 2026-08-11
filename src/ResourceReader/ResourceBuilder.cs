@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace ResourceReader
@@ -35,6 +36,12 @@ namespace ResourceReader
         {
             var property = propertyMap[name];
             return resourceCache.GetOrAdd(property, FindResource);
+        }
+
+        protected object LoadAndDeserialize(string name, Type targetType)
+        {
+            var json = Load(name);
+            return JsonSerializer.Deserialize(json, targetType);
         }
 
         private string FindResource(PropertyInfo property)
@@ -76,6 +83,8 @@ namespace ResourceReader
     {
         private static MethodInfo loadMethod;
 
+        private static MethodInfo loadAndDeserializeMethod;
+
         private static ConstructorInfo constructor;
 
         private ResourcePredicate resourcePredicate;
@@ -88,6 +97,7 @@ namespace ResourceReader
         static ResourceBuilder()
         {
             loadMethod = typeof(ResourceRepository).GetMethod("Load", BindingFlags.Instance | BindingFlags.NonPublic);
+            loadAndDeserializeMethod = typeof(ResourceRepository).GetMethod("LoadAndDeserialize", BindingFlags.Instance | BindingFlags.NonPublic);
             constructor = typeof(ResourceRepository).GetConstructors()[0];
             DefaultResourcePredicate = (resourceName, requestingProperty) =>
             {
@@ -190,7 +200,22 @@ namespace ResourceReader
 
                 ilGenerator.Emit(OpCodes.Ldarg_0);
                 ilGenerator.Emit(OpCodes.Ldstr, property.Name);
-                ilGenerator.Emit(OpCodes.Call, loadMethod);
+
+                if (property.PropertyType == typeof(string))
+                {
+                    ilGenerator.Emit(OpCodes.Call, loadMethod);
+                }
+                else
+                {
+                    ilGenerator.Emit(OpCodes.Ldtoken, property.PropertyType);
+                    ilGenerator.Emit(OpCodes.Call, typeof(Type).GetMethod("GetTypeFromHandle"));
+                    ilGenerator.Emit(OpCodes.Call, loadAndDeserializeMethod);
+                    if (property.PropertyType.IsValueType)
+                        ilGenerator.Emit(OpCodes.Unbox_Any, property.PropertyType);
+                    else
+                        ilGenerator.Emit(OpCodes.Castclass, property.PropertyType);
+                }
+
                 ilGenerator.Emit(OpCodes.Ret);
 
                 propertyBuilder.SetGetMethod(methodBuilder);

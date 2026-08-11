@@ -95,6 +95,45 @@ Finally we can also customize how to process the resource stream that is read fr
 new ResourceBuilder().WithTextProcessor((resourceInfo) => resourceInfo.Stream.ReadAsUTF8())
 ```
 
+## JSON deserialization
+
+When a property's return type is anything other than `string`, **ResourceReader** will automatically read the embedded resource as JSON and deserialize it into the declared type using `System.Text.Json`.
+
+Say we have a configuration file embedded in our assembly:
+
+```shell
+└── Config
+    └── FeatureFlags.json
+```
+
+```json
+{ "EnableDarkMode": true, "MaxRetries": 3 }
+```
+
+We define a matching POCO and an interface property typed to it:
+
+```c#
+public class FeatureFlags
+{
+    public bool EnableDarkMode { get; set; }
+    public int MaxRetries { get; set; }
+}
+
+public interface IConfig
+{
+    FeatureFlags FeatureFlags { get; }
+}
+```
+
+Then build the accessor as usual:
+
+```c#
+var config = new ResourceBuilder().Build<IConfig>();
+var flags = config.FeatureFlags; // deserialized from FeatureFlags.json
+```
+
+No additional setup is needed. String properties continue to return raw text; any other property type triggers JSON deserialization.
+
 Enjoy!
 
 
